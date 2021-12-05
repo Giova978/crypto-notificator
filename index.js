@@ -97,20 +97,16 @@ app.get("/crypto", async (req, res) => {
     if (data[lastBuyPoint].date > lastStoredBuyPoint) {
         const pointData = data[lastBuyPoint];
         const date = new Date(pointData.date);
-        const dateString = `${date.getDate()}/${date.getMonth() + 1}`;
-        const time = `${date.getHours()}:${date.getMinutes()}`;
 
-        notifySubscribers(`Buy, price: ${pointData.close} | ${dateString} ${time}`);
+        notifySubscribers(`Buy, price: ${pointData.close}`, date);
         lastStoredBuyPoint = data[lastBuyPoint].date;
     }
 
     if (data[lastSellPoint].date > lastStoredSellPoint) {
         const pointData = data[lastSellPoint];
         const date = new Date(pointData.date);
-        const dateString = `${date.getDate()}/${date.getMonth() + 1}`;
-        const time = `${date.getHours()}:${date.getMinutes()}`;
 
-        notifySubscribers(`Sell, price: ${pointData.close} | ${dateString} ${time}`);
+        notifySubscribers(`Sell, price: ${pointData.close}`, date);
         lastStoredSellPoint = data[lastSellPoint].date;
     }
 
@@ -190,13 +186,14 @@ function getM20(data) {
 
 const hash = (data) => createHash("sha256").update(data).digest("hex");
 
-async function notifySubscribers(message) {
+async function notifySubscribers(message, date) {
     const subs = await getAllSubscriptions();
 
     const payload = {
         title: "Crypto Alert",
         body: message,
         url: "https://focused-hodgkin-8eb274.netlify.app",
+        ms: date,
     };
 
     console.log(payload);
