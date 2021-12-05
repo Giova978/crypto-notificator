@@ -13,6 +13,7 @@ require("dotenv").config({});
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static("public"));
 
 const connection = createPool({
     host: process.env.DB_HOST,
@@ -24,11 +25,6 @@ const connection = createPool({
 });
 
 webPush.setVapidDetails("https://gmail.com", process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
-
-app.get("/test", async (req, res) => {
-    const subs = await getAllSubscriptions();
-    console.log(subs);
-});
 
 app.post("/subscribe", async (req, res) => {
     const subHash = hash(req.body.keys.auth);
@@ -58,7 +54,7 @@ app.post("/unsubscribe", async (req, res) => {
     res.status(200).json({ message: "Successfully unsubscribed" });
 });
 
-app.get("/", async (req, res) => {
+app.get("/crypto", async (req, res) => {
     const data = await getData("btc-usd");
     const m5 = getM5(data);
     const m20 = getM20(data);
