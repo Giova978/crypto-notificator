@@ -109,7 +109,7 @@ app.get("/crypto", async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("Server started"));
+app.listen(process.env.PORT, () => console.log("Server started"));
 
 /**
  * Takes an array of numbers and returns the average in a determined window
