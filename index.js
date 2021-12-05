@@ -182,6 +182,18 @@ function getM20(data) {
 
 const hash = (data) => createHash("sha256").update(data).digest("hex");
 
+function notifySubscribers(message) {
+    const subs = getAllSubscriptions();
+
+    subs.map((sub) => {
+        webPush.sendNotification(sub, {
+            title: "Crypto Alert",
+            body: message,
+            url: "https://focused-hodgkin-8eb274.netlify.app",
+        });
+    });
+}
+
 function hashInDB(hash) {
     return new Promise((resolve, reject) => {
         connection.query(`SELECT 1 FROM ${process.env.DB_TABLE} WHERE subHash = ?`, [hash], (err, results, fields) => {
