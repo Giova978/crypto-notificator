@@ -182,8 +182,8 @@ function getM20(data) {
 
 const hash = (data) => createHash("sha256").update(data).digest("hex");
 
-function notifySubscribers(message) {
-    const subs = getAllSubscriptions();
+async function notifySubscribers(message) {
+    const subs = await getAllSubscriptions();
 
     subs.map((sub) => {
         webPush.sendNotification(sub, {
