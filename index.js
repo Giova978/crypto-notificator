@@ -184,11 +184,16 @@ async function notifySubscribers(message) {
     const subs = await getAllSubscriptions();
 
     subs.map((sub) => {
-        webPush.sendNotification(sub, {
-            title: "Crypto Alert",
-            body: message,
-            url: "https://focused-hodgkin-8eb274.netlify.app",
-        });
+        webPush.sendNotification(
+            sub,
+            JSON.stringify({
+                payload: {
+                    title: "Crypto Alert",
+                    body: message,
+                    url: "https://focused-hodgkin-8eb274.netlify.app",
+                },
+            }),
+        );
     });
 }
 
