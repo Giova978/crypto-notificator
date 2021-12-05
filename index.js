@@ -107,6 +107,8 @@ app.get("/crypto", async (req, res) => {
     if (data[lastBuyPoint].date === lastStoredBuyPoint || data[lastSellPoint].date === lastStoredSellPoint) {
         writeFileSync("./lastStoredPoints.json", JSON.stringify([data[lastBuyPoint].date, data[lastSellPoint].date]));
     }
+
+    res.status(200).send();
 });
 
 app.listen(process.env.PORT, () => console.log("Server started"));
