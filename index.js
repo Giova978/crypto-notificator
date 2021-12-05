@@ -1,4 +1,4 @@
-const { writeFileSync } = require("fs");
+const { writeFileSync, readFileSync } = require("fs");
 const { history } = require("yahoo-stocks");
 
 const { createPool } = require("mysql");
@@ -47,7 +47,7 @@ app.post("/unsubscribe", async (req, res) => {
 
     if (subscribed) {
         if (!removeSubsciption(subHash)) {
-            res.status(500).send({ message: "There was an error while unsubscribing" });
+            res.status(500).json({ message: "There was an error while unsubscribing" });
         }
     }
 
@@ -89,18 +89,28 @@ app.get("/crypto", async (req, res) => {
         }
     }
 
-    let [lastStoredBuyPoint, lastStoredSellPoint] = require("./lastStoredPoints.json");
+    let [lastStoredBuyPoint, lastStoredSellPoint] = JSON.parse(readFileSync("./lastStoredPoints.json"));
 
     const lastBuyPoint = buyPoints[buyPoints.length - 1];
     const lastSellPoint = sellPoints[sellPoints.length - 1];
 
     if (data[lastBuyPoint].date > lastStoredBuyPoint) {
-        notifySubscribers(`Buy, price: ${data[lastBuyPoint].close}`);
+        const pointData = data[lastBuyPoint];
+        const date = new Date(pointData.date);
+        const dateString = `${date.getDate()}/${date.getMonth() + 1}`;
+        const time = `${date.getHours()}:${date.getMinutes()}`;
+
+        notifySubscribers(`Buy, price: ${pointData.close} | ${dateString} ${time}`);
         lastStoredBuyPoint = data[lastBuyPoint].date;
     }
 
     if (data[lastSellPoint].date > lastStoredSellPoint) {
-        notifySubscribers(`Sell, price: ${data[lastSellPoint].close}`);
+        const pointData = data[lastSellPoint];
+        const date = new Date(pointData.date);
+        const dateString = `${date.getDate()}/${date.getMonth() + 1}`;
+        const time = `${date.getHours()}:${date.getMinutes()}`;
+
+        notifySubscribers(`Sell, price: ${pointData.close} | ${dateString} ${time}`);
         lastStoredSellPoint = data[lastSellPoint].date;
     }
 
@@ -183,17 +193,15 @@ const hash = (data) => createHash("sha256").update(data).digest("hex");
 async function notifySubscribers(message) {
     const subs = await getAllSubscriptions();
 
+    const payload = {
+        title: "Crypto Alert",
+        body: message,
+        url: "https://focused-hodgkin-8eb274.netlify.app",
+    };
+
+    console.log(payload);
     subs.map((sub) => {
-        webPush.sendNotification(
-            sub,
-            JSON.stringify({
-                payload: {
-                    title: "Crypto Alert",
-                    body: message,
-                    url: "https://focused-hodgkin-8eb274.netlify.app",
-                },
-            }),
-        );
+        webPush.sendNotification(sub, JSON.stringify(payload));
     });
 }
 
